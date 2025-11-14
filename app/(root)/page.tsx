@@ -1,4 +1,4 @@
-const Homepage = () => {
+const Homepage = async () => {
   return <div>Arks-Mart made by Arka</div>;
 };
 
