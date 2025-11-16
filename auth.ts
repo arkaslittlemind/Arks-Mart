@@ -43,6 +43,7 @@ export const config = {
             return {
               id: user.id,
               name: user.name,
+              email: user.email,
               role: user.role,
             };
           }
@@ -61,7 +62,6 @@ export const config = {
       if (trigger === "update") {
         session.user.name = user.name;
       }
-
       return session;
     },
   },
