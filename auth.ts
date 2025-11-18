@@ -89,7 +89,7 @@ export const config = {
       // check for session cart cookie
       if (!request.cookies.get("sessionCartId")) {
         // generate new session cart id cookie
-        const sessionCardId = crypto.randomUUID();
+        const sessionCartId = crypto.randomUUID();
 
         const newRequestHeaders = new Headers(request.headers);
 
@@ -99,7 +99,7 @@ export const config = {
           },
         });
 
-        response.cookies.set("sessionCardId", sessionCardId);
+        response.cookies.set("sessionCartId", sessionCartId);
         return response;
       } else {
         return true;
