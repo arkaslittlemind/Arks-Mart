@@ -1,7 +1,3 @@
 import { auth } from "@/auth";
 
 export default auth;
-
-export const config = {
-  matcher: ["/((?!_next|favicon.ico|public).*)"],
-};

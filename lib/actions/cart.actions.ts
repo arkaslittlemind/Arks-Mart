@@ -70,6 +70,23 @@ export async function addItemToCart(data: CartItem) {
         message: "Item added to cart",
       };
     }
+
+    const updatedItems = [...cart.items, item];
+
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: {
+        items: updatedItems,
+        ...calcPrice(updatedItems),
+      },
+    });
+
+    revalidatePath(`/product/${product.slug}`);
+
+    return {
+      success: true,
+      message: "Item added to existing cart",
+    };
   } catch (error) {
     return {
       success: false,
