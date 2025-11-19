@@ -14,19 +14,21 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
   const [isPending, startTransition] = useTransition();
 
   const handleAddToCart = async () => {
-    const res = await addItemToCart(item);
+    startTransition(async () => {
+      const res = await addItemToCart(item);
 
-    if (!res.success) {
-      console.log(res);
-      toast.error(res.message);
-      return;
-    }
+      if (!res.success) {
+        console.log(res);
+        toast.error(res.message);
+        return;
+      }
 
-    toast.success(res.message, {
-      action: {
-        label: "Go to Cart",
-        onClick: () => router.push("/cart"),
-      },
+      toast.success(res.message, {
+        action: {
+          label: "Go to Cart",
+          onClick: () => router.push("/cart"),
+        },
+      });
     });
   };
 
