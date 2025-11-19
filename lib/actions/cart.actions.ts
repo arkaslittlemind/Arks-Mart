@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
 import { cartItemSchema, insertCartSchema } from "../validators";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 // calculate cart prices
 const calcPrice = (items: CartItem[]) => {
@@ -67,26 +68,52 @@ export async function addItemToCart(data: CartItem) {
 
       return {
         success: true,
-        message: "Item added to cart",
+        message: `${product.name} added to cart`,
+      };
+    } else {
+      // check if item is already in cart
+      const existingItem = (cart.items as CartItem[]).find(
+        (x) => x.productId === item.productId
+      );
+
+      // check if item exists
+      if (existingItem) {
+        // check stock
+        if (product.stock < existingItem.qty + 1) {
+          throw new Error("Not enough stock");
+        }
+        // increase the quantity
+        (cart.items as CartItem[]).find(
+          (x) => x.productId === item.productId
+        )!.qty = existingItem.qty + 1;
+      } else {
+        // if item doesn't exist in cart
+        // check stock
+        if (product.stock < 1) throw new Error("Not enough stock");
+
+        // add item to the cart.items
+        cart.items.push(item);
+      }
+
+      // save to db
+      await prisma.cart.update({
+        where: { id: cart.id },
+        data: {
+          items: cart.items as Prisma.CartUpdateitemsInput[],
+          ...calcPrice(cart.items as CartItem[]),
+        },
+      });
+
+      // revalidate product page
+      revalidatePath(`/product/${product.slug}`);
+
+      return {
+        success: true,
+        message: `${product.name} ${
+          existingItem ? "updated in" : "added to"
+        } cart`,
       };
     }
-
-    const updatedItems = [...cart.items, item];
-
-    await prisma.cart.update({
-      where: { id: cart.id },
-      data: {
-        items: updatedItems,
-        ...calcPrice(updatedItems),
-      },
-    });
-
-    revalidatePath(`/product/${product.slug}`);
-
-    return {
-      success: true,
-      message: "Item added to existing cart",
-    };
   } catch (error) {
     return {
       success: false,
